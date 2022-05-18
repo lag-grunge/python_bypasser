@@ -16,12 +16,6 @@ mp3filename = '1.mp3'
 byPassUrl = 'https://contributor-accounts.shutterstock.com/login'
 googleIBMLink = 'https://speech-to-text-demo.ng.bluemix.net/'
 
-
-# fake proxies
-proxies = ["mysuperproxy.com:5000", "mysuperproxy.com:5001", "mysuperproxy.com:5100", "mysuperproxy.com:5010",
-           "mysuperproxy.com:5050", "mysuperproxy.com:8080", "mysuperproxy.com:8001",
-           "mysuperproxy.com:8000", "mysuperproxy.com:8050"]
-
 def audioToText(driver):
     driver.execute_script('''window.open("","_blank");''')
     driver.switch_to.window(driver.window_handles[1])
@@ -48,25 +42,6 @@ def saveFile(content,filename):
     with open(filename, "wb") as handle:
         for data in content.iter_content():
             handle.write(data)
-
-def set_proxy(driver, http_addr='', http_port=0, ssl_addr='', ssl_port=0, socks_addr='', socks_port=0):
-
-    driver.execute("SET_CONTEXT", {"context": "chrome"})
-
-    try:
-        driver.execute_script("""
-          Services.prefs.setIntPref('network.proxy.type', 1);
-          Services.prefs.setCharPref("network.proxy.http", arguments[0]);
-          Services.prefs.setIntPref("network.proxy.http_port", arguments[1]);
-          Services.prefs.setCharPref("network.proxy.ssl", arguments[2]);
-          Services.prefs.setIntPref("network.proxy.ssl_port", arguments[3]);
-          Services.prefs.setCharPref('network.proxy.socks', arguments[4]);
-          Services.prefs.setIntPref('network.proxy.socks_port', arguments[5]);
-          """, http_addr, http_port, ssl_addr, ssl_port, socks_addr, socks_port)
-    finally:
-        driver.execute("SET_CONTEXT", {"context": "content"})
-
-
 
 def work(driver, byPassUrl):
     driver.get(byPassUrl)
@@ -137,8 +112,8 @@ if __name__ == '__main__':
     with webdriver.Firefox(service=Service(GeckoDriverManager(cache_valid_range=1).install()), options=Options()) as driver:
         while work(driver, byPassUrl) == 0:
             time.sleep(1)
-            cur_proxy = proxies[random.randint(0, len(proxies) - 1)]
-            set_proxy(driver, http_addr=cur_proxy.split(':')[0], http_port=int(cur_proxy.split(':')[1]))
+            # cur_proxy = proxies[random.randint(0, len(proxies) - 1)]
+            # set_proxy(driver, http_addr=cur_proxy.split(':')[0], http_port=int(cur_proxy.split(':')[1]))
         sendLogin(driver, sys.argv[1], sys.argv[2])
-        os.system("read -p 'Press any key'")
+        os.system("read -p 'Press any key' case")
         os.system("rm -f " + mp3filename)
