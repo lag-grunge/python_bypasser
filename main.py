@@ -13,13 +13,19 @@ from bs4 import BeautifulSoup
 delayTime = 2
 audioToTextDelay = 10
 filename = '1.mp3'
-#byPassUrl = 'https://www.google.com/recaptcha/api2/demo'
 byPassUrl = 'https://contributor-accounts.shutterstock.com/login'
 googleIBMLink = 'https://speech-to-text-demo.ng.bluemix.net/'
 option = webdriver.FirefoxOptions()
 option.add_argument('--disable-notifications')
 option.add_argument("--mute-audio")
-# option.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+
+# browser
+driver = webdriver.Firefox(executable_path=GeckoDriverManager(cache_valid_range=1).install(), options=option)
+
+# mock proxies
+proxies = ["mysuperproxy.com:5000", "mysuperproxy.com:5001", "mysuperproxy.com:5100", "mysuperproxy.com:5010",
+           "mysuperproxy.com:5050", "mysuperproxy.com:8080", "mysuperproxy.com:8001",
+           "mysuperproxy.com:8000", "mysuperproxy.com:8050"]
 
 def audioToText(mp3Path):
     print("1")
@@ -75,7 +81,7 @@ def set_proxy(driver, http_addr='', http_port=0, ssl_addr='', ssl_port=0, socks_
     finally:
         driver.execute("SET_CONTEXT", {"context": "content"})
 
-driver = webdriver.Firefox(executable_path=GeckoDriverManager(cache_valid_range=1).install(), options=option)
+
 
 def work(byPassUrl):
     driver.get(byPassUrl)
@@ -131,12 +137,19 @@ def work(byPassUrl):
         print('Button not found. This should not happen.')
         return 0
 
+def sendLogin(user, passwrd):
+    driver.switch_to.default_content()
+    username = driver.find_element_by_id("login-username")
+    password = driver.find_element_by_id("login-password")
+    username.send_keys(user)
+    password.send_keys(passwrd)
+    log = driver.find_element_by_id("login")
+    log.click()
+
 
 if __name__ == '__main__':
-    proxies = ["mysuperproxy.com:5000", "mysuperproxy.com:5001", "mysuperproxy.com:5100", "mysuperproxy.com:5010",
-     "mysuperproxy.com:5050", "mysuperproxy.com:8080", "mysuperproxy.com:8001",
-     "mysuperproxy.com:8000", "mysuperproxy.com:8050"]
     while work(byPassUrl) == 0:
         time.sleep(1)
         cur_proxy = proxies[random.randint(0, len(proxies) - 1)]
         set_proxy(driver, http_addr=cur_proxy.split(':')[0], http_port=int(cur_proxy.split(':')[1]))
+    sendLogin(sys.argv[1], sys.argv[2])
